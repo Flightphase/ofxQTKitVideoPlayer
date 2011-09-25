@@ -175,7 +175,7 @@ bool ofxQTKitVideoPlayer::update()
 	if (bNewFrame) {
 		bHavePixelsChanged = true;
 	}
-	return true;
+	return bHavePixelsChanged;
 }
 
 bool ofxQTKitVideoPlayer::isFrameNew()
