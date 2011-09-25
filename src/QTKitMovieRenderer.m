@@ -135,7 +135,7 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 		
 		OSStatus err = QTPixelBufferContextCreate(kCFAllocatorDefault, (CFDictionaryRef)ctxAttributes, &_visualContext);
 		if(err){
-			NSLog(@"error %i creating OpenGLTextureContext", err);
+			NSLog(@"error %i creating OpenPixelBufferContext", err);
 			return NO;
 		}
 		
@@ -297,6 +297,7 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 	return YES;
 }
 
+
 //writes out the pixels in RGBA format to outbuf
 - (void) pixels:(unsigned char*) outbuf
 {
@@ -328,6 +329,79 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 	CVPixelBufferUnlockBaseAddress(_latestPixelFrame, 0);	
 }
 
+
+static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPix)
+{
+	int i;
+	for(i = 0; i < numPix; i++){
+		memcpy(dst, src+1, 3);
+		src+=4;
+		dst+=3;
+	}
+}
+
+
+static inline void uyvy2gray(unsigned char *SRC, unsigned char *GRAY, unsigned int NumPixels) {
+	
+	int i;
+    for (i = 0; i < NumPixels; i ++){
+		
+		SRC++;
+		*GRAY++ = *SRC;
+		SRC++;
+    }
+}
+
+#define SAT(c) if (c & (~255)) { if (c < 0) c = 0; else c = 255; }
+static inline void uyvy2rgb( unsigned char *src, unsigned char *dest, int width, int height) {
+	
+	int R,G,B;
+	int Y1,Y2;
+	int cG,cR,cB;
+	int i;
+	for(i=height*width/2;i>0;i--) {
+		
+		cB = ((*src - 128) * 454) >> 8;
+		
+		cG = (*src++ - 128) * 88;
+		
+		Y1 = *src++;  
+		
+		cR = ((*src - 128) * 359) >> 8;
+		
+		cG = (cG + (*src++ - 128) * 183) >> 8;
+		
+		Y2 = *src++;
+		
+		R = Y1 + cR;
+		
+		G = Y1 + cG;
+		
+		B = Y1 + cB;
+		
+		SAT(R);
+		
+		SAT(G);
+		
+		SAT(B);
+		
+		*dest++ = B;
+		*dest++ = G;
+		*dest++ = R;
+		
+		R = Y2 + cR;
+		G = Y2 + cG;
+		B = Y2 + cB;
+		
+		SAT(R);
+		SAT(G);
+		SAT(B);
+		
+		*dest++ = B;
+		*dest++ = G;
+		*dest++ = R;
+	}	
+}
 
 - (void) bindTexture
 {
