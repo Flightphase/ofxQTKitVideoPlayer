@@ -90,11 +90,11 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 	//opt into Quicktime X
 	//this will give some speed up for texture-only rendering on 10.6 machines
 	//but sometimes will slow it down alot!
-	#ifdef MAC_OS_X_VERSION_10_6
-	if(self.useTexture && !self.usePixels){
-		[movieAttributes setObject:[NSNumber numberWithBool:YES] forKey:QTMovieOpenForPlaybackAttribute];
-	}
-	#endif
+//	#ifdef MAC_OS_X_VERSION_10_6
+//	if(self.useTexture && !self.usePixels){
+//		[movieAttributes setObject:[NSNumber numberWithBool:YES] forKey:QTMovieOpenForPlaybackAttribute];
+//	}
+//	#endif
 	
 	_movie = [[QTMovie alloc] initWithAttributes:movieAttributes 
 										   error: &error];
@@ -341,68 +341,6 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 }
 
 
-static inline void uyvy2gray(unsigned char *SRC, unsigned char *GRAY, unsigned int NumPixels) {
-	
-	int i;
-    for (i = 0; i < NumPixels; i ++){
-		
-		SRC++;
-		*GRAY++ = *SRC;
-		SRC++;
-    }
-}
-
-#define SAT(c) if (c & (~255)) { if (c < 0) c = 0; else c = 255; }
-static inline void uyvy2rgb( unsigned char *src, unsigned char *dest, int width, int height) {
-	
-	int R,G,B;
-	int Y1,Y2;
-	int cG,cR,cB;
-	int i;
-	for(i=height*width/2;i>0;i--) {
-		
-		cB = ((*src - 128) * 454) >> 8;
-		
-		cG = (*src++ - 128) * 88;
-		
-		Y1 = *src++;  
-		
-		cR = ((*src - 128) * 359) >> 8;
-		
-		cG = (cG + (*src++ - 128) * 183) >> 8;
-		
-		Y2 = *src++;
-		
-		R = Y1 + cR;
-		
-		G = Y1 + cG;
-		
-		B = Y1 + cB;
-		
-		SAT(R);
-		
-		SAT(G);
-		
-		SAT(B);
-		
-		*dest++ = B;
-		*dest++ = G;
-		*dest++ = R;
-		
-		R = Y2 + cR;
-		G = Y2 + cG;
-		B = Y2 + cB;
-		
-		SAT(R);
-		SAT(G);
-		SAT(B);
-		
-		*dest++ = B;
-		*dest++ = G;
-		*dest++ = R;
-	}	
-}
-
 - (void) bindTexture
 {
 	if(!self.useTexture || _latestTextureFrame == NULL) return;
@@ -444,7 +382,7 @@ static inline void uyvy2rgb( unsigned char *src, unsigned char *dest, int width,
 
 - (float) volume
 {
-	[_movie volume];
+	return [_movie volume];
 }
 
 - (void) setPosition:(CGFloat) position

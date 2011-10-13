@@ -54,10 +54,10 @@ void testApp::setup(){
 	
 	//try out different modes!
 	//mode = OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY;
-	//mode = OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY;
-	mode = OFXQTVIDEOPLAYER_MODE_PIXELS_AND_TEXTURE;
+	mode = OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY;
+	//mode = OFXQTVIDEOPLAYER_MODE_PIXELS_AND_TEXTURE;
 	
-	testMovie.loadMovie("synchronizedswim.mp4", mode);	
+	testMovie.loadMovie("jm_264.mov", mode);	
 	testMovie.play();
 	if(mode != OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY){
 		ourOwnTexture.allocate(testMovie.getWidth(), testMovie.getHeight(), GL_RGBA);

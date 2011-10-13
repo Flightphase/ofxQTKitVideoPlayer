@@ -103,6 +103,7 @@ class ofxQTKitVideoPlayer // : public ofBaseVideo //JG can't extend base video u
 	void   				setSpeed(float speed);
 	void				setFrame(int frame);  // frame 0 = first frame...
 	
+	void 				draw(ofRectangle drawRect);
 	void 				draw(float x, float y, float w, float h);
 	void 				draw(float x, float y);
 	

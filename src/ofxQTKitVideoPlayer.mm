@@ -140,6 +140,11 @@ bool ofxQTKitVideoPlayer::isPaused()
 	return getSpeed() == 0.0;
 }
 
+bool ofxQTKitVideoPlayer::isPlaying()
+{
+	return !moviePlayer.isFinished; 
+}
+
 void ofxQTKitVideoPlayer::setSpeed(float rate)
 {
 	if(moviePlayer == NULL) return;
@@ -195,6 +200,10 @@ void ofxQTKitVideoPlayer::unbind()
 	if(moviePlayer == NULL || !moviePlayer.useTexture) return;
 	
 	[moviePlayer unbindTexture];
+}
+
+void ofxQTKitVideoPlayer::draw(ofRectangle drawRect){
+	draw(drawRect.x, drawRect.y, drawRect.width, drawRect.height);
 }
 
 void ofxQTKitVideoPlayer::draw(float x, float y)
