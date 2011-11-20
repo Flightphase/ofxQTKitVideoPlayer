@@ -206,6 +206,8 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 	[super dealloc];
 }
 
+//JG Note, in the OF wrapper this does not get used since we have a modified ofTexture taht we use to draw
+//this is here in case you want to use this renderer outside of openFrameworks
 - (void) draw:(NSRect)drawRect
 {   
 	
@@ -240,8 +242,6 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 	glEnd();
 	
 	[self unbindTexture];
-	
-	QTVisualContextTask(_visualContext);
 	
 }
 
@@ -294,6 +294,8 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 		}
 	}
 	
+	QTVisualContextTask(_visualContext);
+	
 	return YES;
 }
 
@@ -340,10 +342,26 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 	}
 }
 
+- (BOOL) textureAllocated
+{
+	NSLog(@"Use Texture? %d Is the textureframe null? %d", self.useTexture, _latestTextureFrame);
+	
+	return self.useTexture && _latestTextureFrame != NULL;
+}
+
+- (GLuint) textureID
+{
+	return CVOpenGLTextureGetName(_latestTextureFrame);
+}
+
+- (GLenum) textureTarget
+{
+	return CVOpenGLTextureGetTarget(_latestTextureFrame);
+}
 
 - (void) bindTexture
 {
-	if(!self.useTexture || _latestTextureFrame == NULL) return;
+	if(!self.textureAllocated) return;
 
 	GLuint texID = 0;
 	texID = CVOpenGLTextureGetName(_latestTextureFrame);
@@ -358,7 +376,7 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 
 - (void) unbindTexture
 {
-	if(!self.useTexture || _latestTextureFrame == NULL) return;
+	if(!self.textureAllocated) return;
 	
 	GLenum target = GL_TEXTURE_RECTANGLE_ARB;
 	target = CVOpenGLTextureGetTarget(_latestTextureFrame);

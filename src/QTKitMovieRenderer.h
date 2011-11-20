@@ -83,10 +83,14 @@
 @property(nonatomic, readwrite) NSInteger frame;  //set and get frame position by percent
 @property(nonatomic, readwrite) BOOL loops;  //set and get loopstate
 
+@property(nonatomic, readonly) BOOL textureAllocated;
+@property(nonatomic, readonly) GLuint textureID;
+@property(nonatomic, readonly) GLenum textureTarget;
+
 - (void) draw:(NSRect)drawRect;
 - (BOOL) loadMovie:(NSString*)moviePath allowTexture:(BOOL)useTexture allowPixels:(BOOL)usePixels;
 - (BOOL) update;
-
+   
 - (void) bindTexture;
 - (void) unbindTexture;
 

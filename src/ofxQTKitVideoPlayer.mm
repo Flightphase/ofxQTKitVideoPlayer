@@ -46,23 +46,23 @@
 
 #include "ofxQTKitVideoPlayer.h"
 
-ofxQTKitVideoPlayer::ofxQTKitVideoPlayer()
-{
+ofxQTKitVideoPlayer::ofxQTKitVideoPlayer() {
 	moviePlayer = NULL;
-	moviePixels = NULL;
 	bNewFrame = false;
 	duration = 0;
-	nFrames = 0;
+//	nFrames = 0;
 }
 
 
-ofxQTKitVideoPlayer::~ofxQTKitVideoPlayer()
-{
+ofxQTKitVideoPlayer::~ofxQTKitVideoPlayer() {
 	close();	
 }
 
-bool ofxQTKitVideoPlayer::loadMovie(string movieFilePath, int mode)
-{
+bool ofxQTKitVideoPlayer::loadMovie(string path){
+	return loadMovie(path, OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY);
+}
+
+bool ofxQTKitVideoPlayer::loadMovie(string movieFilePath, int mode) {
 	if(mode < 0 || mode > 2){
 		ofLog(OF_LOG_ERROR, "ofxQTKitVideoPlayer -- Error, invalid mode specified for");
 		return false;
@@ -85,9 +85,9 @@ bool ofxQTKitVideoPlayer::loadMovie(string movieFilePath, int mode)
 
 	if(success){
 		duration = moviePlayer.duration;
-		nFrames = moviePlayer.frameCount;
-		width = moviePlayer.movieSize.width;
-		height = moviePlayer.movieSize.height;
+//		nFrames = moviePlayer.frameCount;
+//		width = moviePlayer.movieSize.width;
+//		height = moviePlayer.movieSize.height;
 	}
 	else {
 		ofLog(OF_LOG_ERROR, "ofxQTKitVideoPlayer -- Loading file " + movieFilePath + " failed");
@@ -100,18 +100,15 @@ bool ofxQTKitVideoPlayer::loadMovie(string movieFilePath, int mode)
 	return success;
 }
 
-void ofxQTKitVideoPlayer::closeMovie()
-{
+void ofxQTKitVideoPlayer::closeMovie() {
 	close();
 }
 
-bool ofxQTKitVideoPlayer::isLoaded()
-{
+bool ofxQTKitVideoPlayer::isLoaded() {
 	return moviePlayer != NULL;
 }
 
-void ofxQTKitVideoPlayer::close()
-{
+void ofxQTKitVideoPlayer::close() {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	if(moviePlayer != NULL){
@@ -119,34 +116,34 @@ void ofxQTKitVideoPlayer::close()
 		moviePlayer = NULL;
 	}
 	
-	if(moviePixels != NULL){
-		delete moviePixels;
-		moviePixels = NULL;
-	}
+//	if(moviePixels != NULL){
+//		delete moviePixels;
+//		moviePixels = NULL;
+//	}
+	pixels.clear();
 	
 	duration = 0;
-	nFrames = 0;
 
 	[pool release];	
 }
 
-void ofxQTKitVideoPlayer::pause()
-{
+void ofxQTKitVideoPlayer::pause() {
 	setSpeed(0);
 }
 
-bool ofxQTKitVideoPlayer::isPaused()
-{
+bool ofxQTKitVideoPlayer::isPaused() {
 	return getSpeed() == 0.0;
 }
 
-bool ofxQTKitVideoPlayer::isPlaying()
-{
+void ofxQTKitVideoPlayer::stop() {
+	pause();
+}
+
+bool ofxQTKitVideoPlayer::isPlaying(){
 	return !moviePlayer.isFinished; 
 }
 
-void ofxQTKitVideoPlayer::setSpeed(float rate)
-{
+void ofxQTKitVideoPlayer::setSpeed(float rate){
 	if(moviePlayer == NULL) return;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -156,8 +153,7 @@ void ofxQTKitVideoPlayer::setSpeed(float rate)
 	[pool release];	
 }
 
-void ofxQTKitVideoPlayer::play()
-{	
+void ofxQTKitVideoPlayer::play(){	
 	if(moviePlayer == NULL) return;
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -167,80 +163,79 @@ void ofxQTKitVideoPlayer::play()
 	[pool release];
 }
 
-void ofxQTKitVideoPlayer::idleMovie()
-{
+void ofxQTKitVideoPlayer::idleMovie() {
 	update();
 }
 
-bool ofxQTKitVideoPlayer::update()
-{
-	if(moviePlayer == NULL) return false;
+void ofxQTKitVideoPlayer::update() {
+	if(moviePlayer == NULL) return;
 
 	bNewFrame = [moviePlayer update];
 	if (bNewFrame) {
 		bHavePixelsChanged = true;
 	}
-	return bHavePixelsChanged;
+
 }
 
-bool ofxQTKitVideoPlayer::isFrameNew()
-{
+bool ofxQTKitVideoPlayer::isFrameNew() {
 	return bNewFrame;
 }
 		
-void ofxQTKitVideoPlayer::bind()
-{
+void ofxQTKitVideoPlayer::bind() {
 	if(moviePlayer == NULL || !moviePlayer.useTexture) return;
 	
-	[moviePlayer bindTexture];	
+	updateTexture();
+	tex.bind();
 }
 
-void ofxQTKitVideoPlayer::unbind()
-{
+void ofxQTKitVideoPlayer::unbind(){
 	if(moviePlayer == NULL || !moviePlayer.useTexture) return;
-	
-	[moviePlayer unbindTexture];
+
+	tex.unbind();
+
 }
 
 void ofxQTKitVideoPlayer::draw(ofRectangle drawRect){
 	draw(drawRect.x, drawRect.y, drawRect.width, drawRect.height);
 }
 
-void ofxQTKitVideoPlayer::draw(float x, float y)
-{
-	if(moviePlayer == NULL || !moviePlayer.useTexture) return;
-	
+void ofxQTKitVideoPlayer::draw(float x, float y) {
 	draw(x,y, moviePlayer.movieSize.width, moviePlayer.movieSize.height);
 }
 
-void ofxQTKitVideoPlayer::draw(float x, float y, float w, float h)
-{
-	if(moviePlayer == NULL || !moviePlayer.useTexture) return;
-	
-	[moviePlayer draw:NSMakeRect(x, y, w, h)];
+void ofxQTKitVideoPlayer::draw(float x, float y, float w, float h) {
+	updateTexture();
+	tex.draw(x,y,w,h);	
 }
 
-unsigned char* ofxQTKitVideoPlayer::getPixels()
-{
-	if(moviePlayer == NULL || !moviePlayer.usePixels) {
-		return NULL;
-	}
+ofPixelsRef	ofxQTKitVideoPlayer::getPixelsRef(){
+	if(moviePlayer != NULL && moviePlayer.usePixels) {
 		
-	if(moviePixels == NULL){
-		moviePixels = new unsigned char[int(moviePlayer.movieSize.width) * int(moviePlayer.movieSize.height) * 4];
-	}
-		
-	//don't get the pixels every frame if it hasn't updated
-	if(bHavePixelsChanged){
-		[moviePlayer pixels:moviePixels];
-		bHavePixelsChanged = false;
-	}
-	
-	return moviePixels;
+	   if(!pixels.isAllocated()){
+		   pixels.allocate(moviePlayer.movieSize.width, moviePlayer.movieSize.height, OF_IMAGE_COLOR_ALPHA);
+	   }
+	   
+	   //don't get the pixels every frame if it hasn't updated
+	   if(bHavePixelsChanged){
+		   [moviePlayer pixels:pixels.getPixels()];
+		   bHavePixelsChanged = false;
+	   }
+	}	   
+	return pixels;	   
 }
 
-void ofxQTKitVideoPlayer::setPosition(float pct)
-{
+unsigned char* ofxQTKitVideoPlayer::getPixels() {
+	return getPixelsRef().getPixels();
+}
+
+ofTexture* ofxQTKitVideoPlayer::getTexture() {
+	if(moviePlayer.textureAllocated){
+		updateTexture();
+	}
+	return &tex;
+}
+
+void ofxQTKitVideoPlayer::setPosition(float pct) {
 	if(moviePlayer == NULL) return;
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -250,8 +245,7 @@ void ofxQTKitVideoPlayer::setPosition(float pct)
 	[pool release];
 }
 
-void ofxQTKitVideoPlayer::setVolume(int volume)
-{
+void ofxQTKitVideoPlayer::setVolume(int volume) {
 	if(moviePlayer == NULL) return;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -261,8 +255,7 @@ void ofxQTKitVideoPlayer::setVolume(int volume)
 	[pool release];
 }
 
-void ofxQTKitVideoPlayer::setFrame(int frame)
-{
+void ofxQTKitVideoPlayer::setFrame(int frame) {
 	if(moviePlayer == NULL) return;
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -273,8 +266,7 @@ void ofxQTKitVideoPlayer::setFrame(int frame)
 	
 }
 
-int ofxQTKitVideoPlayer::getCurrentFrame()
-{
+int ofxQTKitVideoPlayer::getCurrentFrame() {
 	if(moviePlayer == NULL) return 0;
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -286,13 +278,13 @@ int ofxQTKitVideoPlayer::getCurrentFrame()
 	return currentFrame;	
 }
 
-int ofxQTKitVideoPlayer::getTotalNumFrames()
-{
-	return nFrames;
+int ofxQTKitVideoPlayer::getTotalNumFrames() {
+	if(moviePlayer == NULL) return 0;
+	
+	return moviePlayer.frameCount;
 }
 
-void ofxQTKitVideoPlayer::setLoopState(bool loops)
-{
+void ofxQTKitVideoPlayer::setLoopState(bool loops) {
 	if(moviePlayer == NULL) return;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -302,8 +294,7 @@ void ofxQTKitVideoPlayer::setLoopState(bool loops)
 	[pool release];
 }
 
-void ofxQTKitVideoPlayer::setLoopState(int ofLoopState)
-{
+void ofxQTKitVideoPlayer::setLoopState(int ofLoopState) {
 	if(ofLoopState == OF_LOOP_NONE){
 		setLoopState(false);
 	}
@@ -314,8 +305,7 @@ void ofxQTKitVideoPlayer::setLoopState(int ofLoopState)
 	//TODO support OF_LOOP_PALINDROME
 }
 
-bool ofxQTKitVideoPlayer::getMovieLoopState()
-{
+bool ofxQTKitVideoPlayer::getMovieLoopState(){
 	if(moviePlayer == NULL) return NO;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -340,18 +330,15 @@ float ofxQTKitVideoPlayer::getSpeed()
 	return rate;
 }
 
-float ofxQTKitVideoPlayer::getDuration()
-{
+float ofxQTKitVideoPlayer::getDuration(){
 	return duration;
 }
 
-float ofxQTKitVideoPlayer::getPositionInSeconds()
-{
+float ofxQTKitVideoPlayer::getPositionInSeconds(){
 	return getPosition() * duration;
 }
 
-float ofxQTKitVideoPlayer::getPosition()
-{
+float ofxQTKitVideoPlayer::getPosition(){
 	if(moviePlayer == NULL) return 0;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -363,8 +350,7 @@ float ofxQTKitVideoPlayer::getPosition()
 	return pos;
 }
 
-bool ofxQTKitVideoPlayer::getIsMovieDone()
-{
+bool ofxQTKitVideoPlayer::getIsMovieDone(){
 	if(moviePlayer == NULL) return false;
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
@@ -376,13 +362,26 @@ bool ofxQTKitVideoPlayer::getIsMovieDone()
 	return isDone;
 }
 
-int ofxQTKitVideoPlayer::getWidth()
-{
+float ofxQTKitVideoPlayer::getWidth() {
 	return moviePlayer.movieSize.width;
 }
 
-int ofxQTKitVideoPlayer::getHeight()
-{
+float ofxQTKitVideoPlayer::getHeight() {
 	return moviePlayer.movieSize.height;
+}
+
+void ofxQTKitVideoPlayer::updateTexture(){
+	if(moviePlayer.textureAllocated){
+	   ofTextureData& data = tex.texData;
+		data.bAllocated = true;
+		data.textureID = moviePlayer.textureID;
+		data.textureTarget = moviePlayer.textureTarget;
+		data.width = getWidth();
+		data.height = getHeight();
+		data.tex_w = getWidth();
+		data.tex_h = getHeight();
+		data.tex_t = getWidth();
+		data.tex_u = getHeight();
+	}
 }
 
