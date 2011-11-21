@@ -130,13 +130,14 @@ class ofxQTKitVideoPlayer  : public ofBaseVideoPlayer
 
 	
   protected:
-	//do lazy allocation and copy on these so it's faster if they aren't used
 	bool			bNewFrame;
 	bool 			bHavePixelsChanged;	
 	float			duration;
 	
 	//pulls texture data from the movie renderer into our ofTexture
 	void updateTexture();
+	
+	//do lazy allocation and copy on these so it's faster if they aren't used
 	ofTexture tex;
 	ofPixels pixels;
 	

@@ -344,8 +344,6 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 
 - (BOOL) textureAllocated
 {
-	NSLog(@"Use Texture? %d Is the textureframe null? %d", self.useTexture, _latestTextureFrame);
-	
 	return self.useTexture && _latestTextureFrame != NULL;
 }
 
