@@ -140,7 +140,7 @@ void ofxQTKitVideoPlayer::stop() {
 }
 
 bool ofxQTKitVideoPlayer::isPlaying(){
-	return !moviePlayer.isFinished; 
+	return !moviePlayer.isFinished && !isPaused(); 
 }
 
 void ofxQTKitVideoPlayer::setSpeed(float rate){
