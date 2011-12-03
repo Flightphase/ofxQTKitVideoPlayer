@@ -180,7 +180,7 @@ bool ofxQTKitVideoPlayer::update()
 	if (bNewFrame) {
 		bHavePixelsChanged = true;
 	}
-	return bHavePixelsChanged;
+	return bNewFrame;
 }
 
 bool ofxQTKitVideoPlayer::isFrameNew()
@@ -222,7 +222,13 @@ void ofxQTKitVideoPlayer::draw(float x, float y, float w, float h)
 
 unsigned char* ofxQTKitVideoPlayer::getPixels()
 {
-	if(moviePlayer == NULL || !moviePlayer.usePixels) {
+	if(moviePlayer == NULL) {
+		ofLogError("ofxQTKitVideoPlayer -- getPixels() movie player is null");
+		return NULL;
+	}
+	
+	if(!moviePlayer.usePixels){
+		ofLogError("ofxQTKitVideoPlayer -- getPixels() not using pixels");
 		return NULL;
 	}
 		

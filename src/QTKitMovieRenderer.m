@@ -397,7 +397,11 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 
 - (void) setFrame:(NSInteger) frame
 {
-	_movie.currentTime = QTMakeTime(frame*frameStep, movieDuration.timeScale);
+	QTTime qtt = QTMakeTime(frame*frameStep, movieDuration.timeScale);
+	//_movie.currentTime = QTMakeTime(frame*frameStep, movieDuration.timeScale);
+	TimeRecord tr;
+	QTGetTimeRecord(qtt, &tr);
+	SetMovieTime([_movie quickTimeMovie], &tr);
 }
 
 - (NSInteger) frame
