@@ -57,7 +57,7 @@ void testApp::setup(){
 	mode = OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY;
 	//mode = OFXQTVIDEOPLAYER_MODE_PIXELS_AND_TEXTURE;
 	
-	testMovie.loadMovie("jm_264.mov", mode);	
+	testMovie.loadMovie("synchronizedswim.mp4", mode);	
 	testMovie.play();
 	if(mode != OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY){
 		ourOwnTexture.allocate(testMovie.getWidth(), testMovie.getHeight(), GL_RGBA);
@@ -67,11 +67,12 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::update(){
 
-	if(testMovie.update()){
+	testMovie.update();
+	if(testMovie.isFrameNew()){
 		//if we have created our video player with pixels, we can use make an oftexture
 		//with any custom pixel processing we want
 		//these modes are how to integrate ofxQTKitVideoPlayer with openCV
-		if(mode != OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY){
+		if(mode == OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY){
 			unsigned char* moviePixels = testMovie.getPixels();
 			//process pixels here if you want
 			//...
@@ -84,7 +85,7 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw(){
 	ofBackground(0,0,0);
-	if(mode != OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY){
+	if(mode == OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY){
 		ourOwnTexture.draw(0,0);	
 	}
 	else {
@@ -93,7 +94,7 @@ void testApp::draw(){
 	
 	ofSetColor(255, 255, 255);	
 	char format[1024];
-	sprintf(format, "playback framerate: %f\nmovie is size %d x %d\nat time: %f/%f\non frame %d / %d\npercent done: %f \nLoops? %s\nDone Yet? %s",  
+	sprintf(format, "playback framerate: %f\nmovie is size %f x %f\nat time: %f/%f\non frame %d / %d\npercent done: %f \nLoops? %s\nDone Yet? %s",  
 			ofGetFrameRate(), 
 			testMovie.getWidth(), testMovie.getHeight(),
 			testMovie.getPositionInSeconds(), testMovie.getDuration(),

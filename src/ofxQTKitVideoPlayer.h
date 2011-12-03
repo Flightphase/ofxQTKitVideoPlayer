@@ -61,24 +61,27 @@
 //this mode renders pixels and textures, is a little bit slower than DRAW_ONLY, but faster than uploading your own texture
 #define OFXQTVIDEOPLAYER_MODE_PIXELS_AND_TEXTURE 2
 
-class ofxQTKitVideoPlayer // : public ofBaseVideo //JG can't extend base video until i figure out how to integrate with ofTexture
+class ofxQTKitVideoPlayer  : public ofBaseVideoPlayer
 {
   public:	
 
 	ofxQTKitVideoPlayer();
 	virtual ~ofxQTKitVideoPlayer();
 	
-	bool				loadMovie(string path, int mode = OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY);
+	bool				loadMovie(string path); //default mode is OFXQTVIDEOPLAYER_MODE_TEXTURE_ONLY
+	bool				loadMovie(string path, int mode);
 	
 	void 				closeMovie();
 	void 				close();
+	
 
 	void				idleMovie();
-	bool				update();
+	void				update();
 	void				play();
+	void				stop();
 	void				pause();
-	
-	//should use an ofTexture, but this will have to do for now
+
+	/// depracated but left for backwards compatability -- use getTexture()->bind() now moving forward
 	void				bind();
 	void				unbind();
 	
@@ -86,6 +89,11 @@ class ofxQTKitVideoPlayer // : public ofBaseVideo //JG can't extend base video u
 	
 	//gets regular openFrameworks compatible RGBA pixels
 	unsigned char * 	getPixels();
+	ofPixelsRef			getPixelsRef();
+	
+	//returns an ofTexture will be NULL if OFXQTVIDEOPLAYER_MODE_PIXELS_ONLY
+	ofTexture *			getTexture();
+	
 	float 				getPosition();
 	float				getPositionInSeconds();
 	float 				getSpeed();
@@ -107,23 +115,31 @@ class ofxQTKitVideoPlayer // : public ofBaseVideo //JG can't extend base video u
 	void 				draw(float x, float y, float w, float h);
 	void 				draw(float x, float y);
 	
-	int					getWidth();
-	int					getHeight();
+	float				getWidth();
+	float				getHeight();
 		
 	bool				isPaused();
 	bool				isLoaded();
 	bool				isPlaying();
-		
-	int					width, height;			//deprecated, use getWidth() and getHeight()
-	int					nFrames;				// number of frames: deprecated. should use getTotalFrames();	
+
+	//TODO
+	virtual void		firstFrame(){}
+	virtual void		nextFrame(){}
+	virtual void		previousFrame(){}
+	
 
 	
   protected:
-	//do lazy allocation and copy on these so it's faster if they aren't used
-	unsigned char*	moviePixels;
 	bool			bNewFrame;
 	bool 			bHavePixelsChanged;	
-	float duration;
+	float			duration;
+	
+	//pulls texture data from the movie renderer into our ofTexture
+	void updateTexture();
+	
+	//do lazy allocation and copy on these so it's faster if they aren't used
+	ofTexture tex;
+	ofPixels pixels;
 	
 	//This #ifdef is so you can include this .h file in .cpp files
 	//and avoid ugly casts in the .m file
