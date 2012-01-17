@@ -166,7 +166,9 @@ typedef struct OpenGLTextureCoordinates OpenGLTextureCoordinates;
 		return NO;
 	}
 	
-	[_movie setVisualContext:_visualContext];
+	// Fix (?) for CVOpenGLTextureCache: Forced to manually upload an IOSurface backed pixel buffer because it uses a non-native pixel format
+	// changed from [_movie setVisualContext:_visualContext];
+	SetMovieVisualContext([_movie quickTimeMovie], _visualContext);
 	
 	self.volume = 1.0;
 	self.loops = YES;
