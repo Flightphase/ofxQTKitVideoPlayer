@@ -255,6 +255,16 @@ void ofxQTKitVideoPlayer::setVolume(int volume) {
 	[pool release];
 }
 
+void ofxQTKitVideoPlayer::setBalance(float balance) {
+	if(moviePlayer == NULL) return;
+	
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
+	[moviePlayer setBalance:balance];
+	
+	[pool release];
+}
+
 void ofxQTKitVideoPlayer::setFrame(int frame) {
 	if(moviePlayer == NULL) return;
 
