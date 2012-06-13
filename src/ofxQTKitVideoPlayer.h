@@ -106,6 +106,7 @@ class ofxQTKitVideoPlayer  : public ofBaseVideoPlayer
 
 	void 				setPosition(float pct);
 	void 				setVolume(int volume);
+    void                setBalance(float balance);
 	void 				setLoopState(bool loops);
 	void 				setLoopState(int ofLoopState);
 	void   				setSpeed(float speed);

@@ -400,6 +400,11 @@ static inline void argb_to_rgb(unsigned char* src, unsigned char* dst, int numPi
 	return [_movie volume];
 }
 
+- (void) setBalance:(float) balance
+{
+    SetMovieAudioBalance([_movie quickTimeMovie], balance, 0);
+}
+
 - (void) setPosition:(CGFloat) position
 {
 	_movie.currentTime = QTMakeTime(position*movieDuration.timeValue, movieDuration.timeScale);
