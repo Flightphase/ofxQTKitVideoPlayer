@@ -97,4 +97,6 @@
 //copies ARGB pixels to RGBA into the outbuf
 - (void) pixels:(unsigned char*) outbuf;
 
+- (void) setBalance:(float) balance;
+
 @end
