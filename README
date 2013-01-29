@@ -1,0 +1,5 @@
+#DEPRECATED
+
+the ofxQTKitVideoPlayer and ofxQTKitVideoGrabber are now part of openFrameworks core.
+
+Please do not use these add ons any longer, instead use of the ofQTKitPlayer and ofQTKitGrabber
